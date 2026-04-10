@@ -815,9 +815,9 @@
       document.getElementById('stat-avg').textContent = `₹${avg.toFixed(2)}`;
 
       // top category
-      const catCount = {};
-      allExpenses.forEach(e => { catCount[e.category] = (catCount[e.category] || 0) + 1; });
-      const top = Object.entries(catCount).sort((a, b) => b[1] - a[1])[0];
+      const catTotals = {};
+      allExpenses.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + parseFloat(e.amount || 0); });
+      const top = Object.entries(catTotals).sort((a, b) => b[1] - a[1])[0];
       document.getElementById('stat-top-cat').textContent = top ? top[0] : '—';
     }
 
