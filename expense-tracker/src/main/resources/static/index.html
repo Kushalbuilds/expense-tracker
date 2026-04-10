@@ -254,6 +254,18 @@
       border-color: var(--red);
     }
 
+    .currency-selector {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
     /* Stats */
     .stats {
       display: grid;
@@ -562,7 +574,15 @@
         <div class="greeting" id="greeting">👋 Hello!</div>
         <div class="sub">Here's your spending overview</div>
       </div>
-      <button class="btn-logout" onclick="logout()">Sign Out</button>
+      <div class="topbar-right" style="display: flex; gap: 10px; align-items: center;">
+        <select class="currency-selector" id="currency-select" onchange="changeCurrency(this.value)">
+          <option value="₹">₹ INR</option>
+          <option value="$">$ USD</option>
+          <option value="€">€ EUR</option>
+          <option value="£">£ GBP</option>
+        </select>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+      </div>
     </div>
 
     <!-- Stats -->
@@ -595,7 +615,7 @@
             <input type="text" id="exp-title" placeholder="e.g. Coffee, Rent..." />
           </div>
           <div class="form-group">
-            <label>Amount (₹)</label>
+            <label id="label-exp-amount">Amount (₹)</label>
             <input type="number" id="exp-amount" placeholder="0.00" min="0" step="0.01" />
           </div>
           <div class="form-group">
@@ -653,10 +673,11 @@
     let allExpenses = [];
     let activeFilter = 'All';
     let chartInstance = null;
+    let currencySymbol = localStorage.getItem('et_currency') || '₹';
 
     const CAT_ICONS = {
       Food: { icon: '🍔', color: '#f59e0b22', border: '#f59e0b44', chartColor: '#f59e0b' },
-      Transport: { icon: '🚗', color: '#3b82f622', border: '#3b82f644', chartColor: '#3b82f6' },
+      Transport: { icon: '🚗', color: 'rgba(248, 113, 113, 0.12)', border: 'rgba(248, 113, 113, 0.3)', chartColor: '#f87171' },
       Entertainment: { icon: '🎬', color: '#8b5cf622', border: '#8b5cf644', chartColor: '#8b5cf6' },
       Shopping: { icon: '🛍️', color: '#ec489922', border: '#ec489944', chartColor: '#ec4899' },
       Health: { icon: '💊', color: '#10b98122', border: '#10b98144', chartColor: '#10b981' },
@@ -747,7 +768,22 @@
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       document.getElementById('greeting').textContent = `👋 Hello, ${currentUser}!`;
+      document.getElementById('currency-select').value = currencySymbol;
+      updateCurrencyUI();
       loadExpenses();
+    }
+
+    function changeCurrency(sym) {
+      currencySymbol = sym;
+      localStorage.setItem('et_currency', sym);
+      updateCurrencyUI();
+      renderExpenses();
+      updateStats();
+      updateChart();
+    }
+
+    function updateCurrencyUI() {
+      document.getElementById('label-exp-amount').textContent = `Amount (${currencySymbol})`;
     }
 
     function logout() {
@@ -800,7 +836,7 @@
             <div class="expense-title">${escHtml(exp.title)}</div>
             <div class="expense-meta">${exp.category} · ${formatDate(exp.date)}</div>
           </div>
-          <div class="expense-amount">-₹${parseFloat(exp.amount).toFixed(2)}</div>
+          <div class="expense-amount">-${currencySymbol}${parseFloat(exp.amount).toFixed(2)}</div>
           <button class="btn-del" onclick="deleteExpense(${exp.id})" title="Delete">🗑️</button>
         </div>`;
       }).join('');
@@ -808,11 +844,11 @@
 
     function updateStats() {
       const total = allExpenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
-      document.getElementById('stat-total').textContent = `₹${total.toFixed(2)}`;
+      document.getElementById('stat-total').textContent = `${currencySymbol}${total.toFixed(2)}`;
       document.getElementById('stat-count').textContent = allExpenses.length;
       
       const avg = allExpenses.length > 0 ? (total / allExpenses.length) : 0;
-      document.getElementById('stat-avg').textContent = `₹${avg.toFixed(2)}`;
+      document.getElementById('stat-avg').textContent = `${currencySymbol}${avg.toFixed(2)}`;
 
       // top category
       const catTotals = {};
@@ -868,7 +904,7 @@
                     label += ': ';
                   }
                   if (context.parsed !== null) {
-                    label += '₹' + context.parsed.toFixed(2);
+                    label += currencySymbol + context.parsed.toFixed(2);
                   }
                   return label;
                 }
