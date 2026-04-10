@@ -138,6 +138,26 @@
     select:focus {
       border-color: var(--accent);
     }
+    
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .password-wrapper input {
+      padding-right: 40px;
+    }
+    
+    .password-wrapper .toggle-pw {
+      position: absolute;
+      right: 12px;
+      cursor: pointer;
+      color: var(--muted);
+      background: none;
+      border: none;
+      font-size: 16px;
+    }
 
     input::placeholder {
       color: var(--muted);
@@ -273,6 +293,10 @@
 
     .stat-card .value.yellow {
       color: var(--yellow);
+    }
+
+    .stat-card .value.blue {
+      color: #3b82f6;
     }
 
     /* Main grid */
@@ -499,7 +523,10 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="login-password" placeholder="Enter your password" />
+          <div class="password-wrapper">
+            <input type="password" id="login-password" placeholder="Enter your password" />
+            <button class="toggle-pw" onclick="togglePasswordVisibility('login-password')">👁️</button>
+          </div>
         </div>
         <button class="btn btn-primary" onclick="doLogin()">Sign In</button>
         <div class="msg" id="login-msg"></div>
@@ -517,7 +544,10 @@
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="reg-password" placeholder="Choose a password" />
+          <div class="password-wrapper">
+            <input type="password" id="reg-password" placeholder="Choose a password" />
+            <button class="toggle-pw" onclick="togglePasswordVisibility('reg-password')">👁️</button>
+          </div>
         </div>
         <button class="btn btn-primary" onclick="doRegister()">Create Account</button>
         <div class="msg" id="register-msg"></div>
@@ -544,6 +574,10 @@
       <div class="stat-card">
         <div class="label">Expenses</div>
         <div class="value purple" id="stat-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Average</div>
+        <div class="value blue" id="stat-avg">₹0.00</div>
       </div>
       <div class="stat-card">
         <div class="label">Top Category</div>
@@ -646,6 +680,15 @@
       document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
       document.getElementById('tab-login').classList.toggle('active', tab === 'login');
       document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    }
+
+    function togglePasswordVisibility(id) {
+      const input = document.getElementById(id);
+      if (input.type === 'password') {
+        input.type = 'text';
+      } else {
+        input.type = 'password';
+      }
     }
 
     function showMsg(id, text, type) {
@@ -767,6 +810,9 @@
       const total = allExpenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
       document.getElementById('stat-total').textContent = `₹${total.toFixed(2)}`;
       document.getElementById('stat-count').textContent = allExpenses.length;
+      
+      const avg = allExpenses.length > 0 ? (total / allExpenses.length) : 0;
+      document.getElementById('stat-avg').textContent = `₹${avg.toFixed(2)}`;
 
       // top category
       const catCount = {};
