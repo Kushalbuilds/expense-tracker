@@ -27,15 +27,11 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.disable())
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**", "/api/**")
+                .ignoringRequestMatchers("/api/**")
                 .disable()
-            )
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin()) // allow H2 console iframe
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/", "/index.html", "/*.html", "/*.css", "/*.js", "/static/**").permitAll()
                 .anyRequest().authenticated()
             )
